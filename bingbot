@@ -1,0 +1,79 @@
+// ==UserScript==
+// @name         BingBot
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  Bot for Bing
+// @author       Mikhail Okmyanskiy
+// @match        https://www.bing.com/*
+// @match        https://auto.ru/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=google.com
+// @grant        none
+// ==/UserScript==
+const getRandom = (min, max) => {
+    return Math.floor(Math.random()*(max - min) + min);
+}
+
+let links = document.links;
+let bingInput = document.querySelector("#sb_form_q");
+let keywords = ["купить вольво", "не пройдёт3", "купить лексус", "не пройдёт2","не пройдёт"];
+let keyword = keywords[getRandom(0, keywords.length)];
+let bingSearchBtn = document.querySelector("#search_icon");
+
+if (bingSearchBtn) {
+  let i = 0;
+  let tmp = '';
+  let timerId = setInterval(()=> {
+    bingInput.value += keyword[i];
+    tmp += keyword[i];
+    i++;
+    if (i == keyword.length) {
+      bingInput.value = tmp;
+      clearInterval(timerId);
+      setTimeout(()=>{
+        bingSearchBtn.click();
+      }, getRandom(1000, 2500));
+
+    }
+  },500);
+
+} else if (location.hostname == "auto.ru") {
+    setInterval(()=>{
+        let index = getRandom(0, links.length);
+
+        if (getRandom(0, 101) > 70) {
+            location.href = "https://www.bing.com/";
+        }
+
+        if (links[index].href.indexOf("auto.ru") !== -1) {
+            links[index].click();
+        }
+
+    }, getRandom(4000, 5000));
+} else {
+    let nextBingPage = true;
+
+    for (let i=0; i<links.length; i++) {
+        if (links[i].href.indexOf("auto.ru") !== -1) {
+            let link = links[i];
+            nextBingPage = false;
+            setTimeout(()=>{
+                link.removeAttribute('target')
+                link.click();
+            }, getRandom(3500,4500))
+            break;
+        }
+    }
+
+    if (window.location.href.includes("first=4")) {
+        nextBingPage = false;
+        location.href = "https://www.bing.com/";
+    }
+
+    if (nextBingPage){
+        let pnnext = document.querySelector("[title='Следующая страница']");
+        setTimeout(()=>{
+            pnnext.click();
+        }, getRandom(3000, 5000));
+
+    }
+}
